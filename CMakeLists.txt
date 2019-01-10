@@ -19,13 +19,29 @@ find_package(catkin REQUIRED
     roscpp
     self_test
     sensor_msgs
+    message_generation
 )
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS})
 
+###############################################################################
+# FIX COMPILATION DEPENDENCY ORDER
+###############################################################################
+# Add Dummy msg which depends on driver_base/SensorLevels
+add_message_files(FILES Dummy.msg)
+generate_messages(DEPENDENCIES std_msgs sensor_msgs driver_base)
+###############################################################################
+
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/Hokuyo.cfg)
+
+###############################################################################
+# FIX COMPILATION DEPENDENCY ORDER
+###############################################################################
+# gencfg depends on Dummy.msg and then, also on driver_base.
+add_dependencies(hokuyo_node_gencfg hokuyo_node_generate_messages)
+###############################################################################
 
 # Export with catkin_package
 catkin_package(
